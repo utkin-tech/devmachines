@@ -1,0 +1,20 @@
+# TODO: remove privileged: /dev/kvm, /dev/net/tun, NET_ADMIN
+# IDEA: may be need 2 networks
+
+services:
+  runtime:
+    container_name: runtime
+    image: devmachines/runtime
+    volumes:
+      - ./blobs:/blobs
+      - image:/image:ro
+    command: sleep infinity
+    privileged: true
+
+  ubuntu:
+    image: devmachines/ubuntu
+    volumes:
+      - image:/image
+
+volumes:
+  image: {}

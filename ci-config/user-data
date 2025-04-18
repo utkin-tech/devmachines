@@ -1,0 +1,14 @@
+#cloud-config
+hostname: my-vm
+manage_etc_hosts: true
+fqdn: my-vm
+user: user
+password: $5$KXasYhNX$QkJkEVjIhA/.W1qjTPhJzgJXeZpvu8RSsGx1HqaxX23
+ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMBEMPGKBgwtQaQ3un8I7j3wIzrknlCUUoetLWJCwfzn erlnby@DESKTOP-46HDCTP
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJx/50sox9LvHx1rrkmOYjn4hitH3jvkm4JomiMdwLUz utkin_danil@mail.ru
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine
+chpasswd:
+  expire: False
+users:
+  - default

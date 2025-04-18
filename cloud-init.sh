@@ -1,5 +1,6 @@
-sudo apt install cloud-image-utils genisoimage
+sudo apt install genisoimage
 
-genisoimage -output seed.iso -volid cidata -joliet -rock user-data meta-data
-
-# genisoimage -output seed.iso -volid cidata -joliet -rock user-data meta-data network-config
+genisoimage -output blobs/seed.iso -volid cidata -joliet -rock \
+  ci-config/user-data \
+  ci-config/meta-data \
+  ci-config/network-config
