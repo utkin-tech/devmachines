@@ -1,5 +1,27 @@
-# TODO: Add dynamic disk generation if not exists
-qemu-img create -b /image/ubuntu.img -F qcow2 -f qcow2 /blobs/disk.img 10G
+#!/bin/bash
+
+BASE_IMAGE="/image/ubuntu.img"
+DISK_IMAGE="/blobs/disk.img"
+DISK_SIZE="10G"
+
+if [ ! -f "$BASE_IMAGE" ]; then
+    echo "Error: Base image $BASE_IMAGE does not exist!"
+    exit 1
+fi
+
+if [ -f "$DISK_IMAGE" ]; then
+    echo "Disk image $DISK_IMAGE already exists. Skipping creation."
+else
+    echo "Creating new disk image from base image..."
+    qemu-img create -b "$BASE_IMAGE" -F qcow2 -f qcow2 "$DISK_IMAGE" "$DISK_SIZE"
+    
+    if [ $? -eq 0 ] && [ -f "$DISK_IMAGE" ]; then
+        echo "Successfully created disk image $DISK_IMAGE"
+    else
+        echo "Error: Failed to create disk image!"
+        exit 1
+    fi
+fi
 
 ip link add name br0 type bridge
 ip link set dev br0 up
