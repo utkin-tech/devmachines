@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/utkin-tech/devmachines/cloudinit"
@@ -21,36 +20,38 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = disk.SetupDisk(user)
+	diskArgs, err := disk.SetupDisk(user)
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		fmt.Printf("failed to setup disk: %v\n", err)
 		os.Exit(1)
 	}
 
-	_, err = cloudinit.SetupCloudInit(net, user)
+	cloudInitArgs, err := cloudinit.SetupCloudInit(net, user)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("failed to setup cloud-init: %v\n", err)
+		os.Exit(1)
 	}
 
-	_, err = network.SetupBridge(net)
+	bridgeArgs, err := network.SetupBridge(net)
 	if err != nil {
-		fmt.Printf("Error setting up network bridge: %v\n", err)
+		fmt.Printf("failed to setup network bridge: %v\n", err)
 		return
 	}
 
-	// config := QEMUConfig{
-	// 	MemoryMB:      2048,
-	// 	CPUCores:      2,
-	// 	DiskImagePath: "/blobs/disk.img",
-	// 	SeedImagePath: "/blobs/seed.iso",
-	// 	TapInterface:  "tap0",
-	// 	Acceleration:  true,
-	// 	Output:        os.Stdout,
-	// 	Wait:          true,
-	// }
+	config := QEMUConfig{
+		MemoryMB: 2048,
+		CPUCores: 2,
+		Output:   os.Stdout,
+		Wait:     true,
+	}
 
-	// if err := LaunchQEMUVM(config); err != nil {
-	// 	fmt.Printf("Error launching VM: %v\n", err)
-	// 	os.Exit(1)
-	// }
+	var args []string
+	args = append(args, diskArgs...)
+	args = append(args, cloudInitArgs...)
+	args = append(args, bridgeArgs...)
+
+	if err := StartVM(config, args...); err != nil {
+		fmt.Printf("Error launching VM: %v\n", err)
+		os.Exit(1)
+	}
 }

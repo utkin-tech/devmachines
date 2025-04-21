@@ -1,6 +1,7 @@
-FROM scratch
+ARG ALPINE_VERSION="3.20"
+
+FROM alpine:${ALPINE_VERSION}
 
 WORKDIR /image
 
-RUN wget -O ubuntu.img \
-    https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img 
+COPY images/ubuntu.img ubuntu.img

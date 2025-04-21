@@ -1,6 +1,5 @@
 # TODO: remove privileged: /dev/kvm, /dev/net/tun, NET_ADMIN
 # IDEA: may be need 2 networks
-# TODO: Wait until image ready
 
 services:
   runtime:
@@ -9,8 +8,10 @@ services:
     volumes:
       - ./blobs:/blobs
       - image:/image:ro
-    command: sleep infinity
     privileged: true
+    depends_on:
+      ubuntu:
+        condition: service_completed_successfully
 
   ubuntu:
     image: devmachines/ubuntu
