@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"fmt"
@@ -6,7 +6,23 @@ import (
 	"strings"
 )
 
-func SetupNetworkBridge(bridgeName string, ethInterface string, tapInterface string, originalIP string) error {
+const (
+	BridgeName   = "br0"
+	TapInterface = "tap0"
+)
+
+func SetupBridge(net Network) ([]string, error) {
+	if err := createBridge(BridgeName, net.InterfaceName(), TapInterface, net.Addresses()); err != nil {
+		return nil, err
+	}
+
+	return []string{
+		"-netdev", fmt.Sprintf("tap,id=net0,ifname=%s,script=no,downscript=no", TapInterface),
+		"-device", "virtio-net-pci,netdev=net0",
+	}, nil
+}
+
+func createBridge(bridgeName string, ethInterface string, tapInterface string, addresses []string) error {
 	if err := runCommand("ip", "link", "add", "name", bridgeName, "type", "bridge"); err != nil {
 		return fmt.Errorf("failed to create bridge: %v", err)
 	}
@@ -37,8 +53,8 @@ func SetupNetworkBridge(bridgeName string, ethInterface string, tapInterface str
 			fmt.Errorf("failed to bring tap up: %v", err)))
 	}
 
-	if originalIP != "" {
-		if err := runCommand("ip", "addr", "del", originalIP, "dev", ethInterface); err != nil {
+	for _, address := range addresses {
+		if err := runCommand("ip", "addr", "del", address, "dev", ethInterface); err != nil {
 			return cleanupTap(tapInterface, cleanupBridge(bridgeName,
 				fmt.Errorf("failed to remove IP from %s: %v", ethInterface, err)))
 		}

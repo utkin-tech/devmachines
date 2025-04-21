@@ -1,5 +1,6 @@
 # TODO: remove privileged: /dev/kvm, /dev/net/tun, NET_ADMIN
 # IDEA: may be need 2 networks
+# TODO: Wait until image ready
 
 services:
   runtime:

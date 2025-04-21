@@ -5,15 +5,65 @@ import (
 	"os/exec"
 )
 
-func CreateCloudInitISO(outputFile string) error {
+const CloudInitIsoPath = "/blobs/seed.iso"
+
+type Network interface {
+	Addresses() []string
+	Gateway() string
+}
+
+type User interface {
+	User() string
+	Password() string
+	SSHKeys() []string
+}
+
+func SetupCloudInit(network Network, user User) ([]string, error) {
+	if err := CreateISO(CloudInitIsoPath, network, user); err != nil {
+		return nil, err
+	}
+
+	return []string{
+		"-drive", fmt.Sprintf("file=%s,format=raw,if=virtio", CloudInitIsoPath),
+	}, nil
+}
+
+func CreateISO(outputFile string, network Network, user User) error {
+	metaDataPath, err := GenerateMetaData(&MetaData{
+		InstanceID:    "iid-local1",
+		LocalHostname: "my-vm",
+	})
+	if err != nil {
+		return err
+	}
+
+	userData := DefaultUserData
+	userData.User = user.User()
+	userData.Password = user.Password()
+	userData.SSHAuthorizedKeys = user.SSHKeys()
+	userDataPath, err := GenerateUserData(&userData)
+	if err != nil {
+		return err
+	}
+
+	ethernet := DefaultEthernet
+	ethernet.Addresses = network.Addresses()
+	ethernet.Gateway4 = network.Gateway()
+
+	networkConfig := NewNetworkConfig(&ethernet)
+	networkConfigPath, err := GenerateNetworkConfig(networkConfig)
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.Command(
 		"genisoimage",
 		"-o", outputFile,
 		"-volid", "cidata",
 		"-joliet", "-rock",
-		"ci-config/user-data",
-		"ci-config/meta-data",
-		"ci-config/network-config",
+		metaDataPath,
+		userDataPath,
+		networkConfigPath,
 	)
 
 	output, err := cmd.CombinedOutput()

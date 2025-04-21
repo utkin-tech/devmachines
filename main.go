@@ -4,49 +4,39 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/utkin-tech/devmachines/cloudinit"
+	"github.com/utkin-tech/devmachines/disk"
+	"github.com/utkin-tech/devmachines/network"
 )
 
 const InterfaceName = "eth0"
 
 func main() {
-	ip, err := GetIPv4ByInterface(InterfaceName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("IPv4: %s\n", ip)
+	user := NewUser()
 
-	gateway, err := GetDefaultGateway()
+	net, err := network.NewNetwork(InterfaceName)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("failed to get info about network: %v\n", err)
+		os.Exit(1)
 	}
-	fmt.Printf("Default gateway: %s\n", gateway)
 
-	err = CreateDiskImage(
-		"/image/ubuntu.img",
-		"/blobs/disk.img",
-		"10G",
-	)
+	_, err = disk.SetupDisk(user)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 		os.Exit(1)
 	}
 
-	// err := createISO("my_folder", "blobs/seed.iso")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("ISO created successfully")
+	_, err = cloudinit.SetupCloudInit(net, user)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// err := SetupNetworkBridge(
-	// 	"br0",        // bridge name
-	// 	"eth0",       // ethernet interface
-	// 	"tap0",       // tap interface
-	// 	"172.20.0.2/16", // IP to remove from eth0
-	// )
-	// if err != nil {
-	// 	fmt.Printf("Error setting up network bridge: %v\n", err)
-	// 	return
-	// }
+	_, err = network.SetupBridge(net)
+	if err != nil {
+		fmt.Printf("Error setting up network bridge: %v\n", err)
+		return
+	}
 
 	// config := QEMUConfig{
 	// 	MemoryMB:      2048,

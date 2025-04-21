@@ -6,10 +6,10 @@ ENV GO111MODULE=auto
 ENV CGO_ENABLED=0
 WORKDIR /src
 
-# RUN --mount=type=bind,src=go.mod,target=go.mod \
-#     --mount=type=bind,src=go.sum,target=go.sum \
-#     --mount=type=cache,target=/go/pkg/mod \
-#     go mod download
+RUN --mount=type=bind,src=go.mod,target=go.mod \
+    --mount=type=bind,src=go.sum,target=go.sum \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 FROM base AS build
 ARG LDFLAGS="-s -w"
@@ -24,6 +24,6 @@ COPY --from=build /devmachines-runtime /devmachines-runtime
 
 FROM alpine:${ALPINE_VERSION}
 
-RUN apk add qemu-system-x86_64 qemu-img iproute2
+RUN apk add qemu-system-x86_64 qemu-img iproute2 cdrkit
 
 COPY --from=binary /devmachines-runtime /devmachines-runtime

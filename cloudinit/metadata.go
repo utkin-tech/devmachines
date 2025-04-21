@@ -13,13 +13,8 @@ type MetaData struct {
 	LocalHostname string `yaml:"local-hostname"`
 }
 
-func GenerateMetaData(instanceID, localHostname string) (string, error) {
-	config := MetaData{
-		InstanceID:    instanceID,
-		LocalHostname: localHostname,
-	}
-
-	yamlData, err := yaml.Marshal(&config)
+func GenerateMetaData(metaData *MetaData) (string, error) {
+	yamlData, err := yaml.Marshal(metaData)
 	if err != nil {
 		return "", fmt.Errorf("error marshal YAML: %w", err)
 	}

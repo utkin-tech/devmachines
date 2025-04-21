@@ -1,4 +1,4 @@
-package main
+package disk
 
 import (
 	"fmt"
@@ -6,7 +6,27 @@ import (
 	"os/exec"
 )
 
-func CreateDiskImage(baseImagePath, diskImagePath, diskSize string) error {
+const (
+	BaseImagePath = "/image/ubuntu.img"
+	DiskImagePath = "/blobs/disk.img"
+)
+
+type User interface {
+	DiskSize() string
+}
+
+func SetupDisk(user User) ([]string, error) {
+	err := createDiskImage(BaseImagePath, DiskImagePath, user.DiskSize())
+	if err != nil {
+		return nil, err
+	}
+
+	return []string{
+		"-drive", fmt.Sprintf("file=%s,format=qcow2,if=virtio", DiskImagePath),
+	}, nil
+}
+
+func createDiskImage(baseImagePath, diskImagePath, diskSize string) error {
 	if _, err := os.Stat(baseImagePath); os.IsNotExist(err) {
 		return fmt.Errorf("base image %s does not exist", baseImagePath)
 	}
@@ -29,10 +49,6 @@ func CreateDiskImage(baseImagePath, diskImagePath, diskSize string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to create disk image: %v, output: %s", err, string(output))
-	}
-
-	if _, err := os.Stat(diskImagePath); os.IsNotExist(err) {
-		return fmt.Errorf("command succeeded but disk image %s was not created", diskImagePath)
 	}
 
 	return nil

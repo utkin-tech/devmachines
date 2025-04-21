@@ -12,8 +12,6 @@ var DefaultUserData = UserData{
 	Hostname:          "my-vm",
 	ManageEtcHosts:    true,
 	FQDN:              "my-vm",
-	User:              "user",
-	Password:          "",
 	SSHAuthorizedKeys: []string{},
 	Chpasswd: ChpasswdType{
 		Expire: false,
@@ -38,10 +36,8 @@ type UserData struct {
 	Users             []string     `yaml:"users"`
 }
 
-func CreateCloudInitFile(userData *UserData) (string, error) {
-	var config UserData
-
-	yamlData, err := yaml.Marshal(&config)
+func GenerateUserData(userData *UserData) (string, error) {
+	yamlData, err := yaml.Marshal(&userData)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal config: %v", err)
 	}
