@@ -12,7 +12,7 @@ const (
 )
 
 func SetupBridge(net Network) ([]string, error) {
-	if err := createBridge(BridgeName, net.InterfaceName(), TapInterface, net.Addresses()); err != nil {
+	if err := createBridge(BridgeName, net.InterfaceName(), TapInterface); err != nil {
 		return nil, err
 	}
 
@@ -22,7 +22,7 @@ func SetupBridge(net Network) ([]string, error) {
 	}, nil
 }
 
-func createBridge(bridgeName string, ethInterface string, tapInterface string, addresses []string) error {
+func createBridge(bridgeName string, ethInterface string, tapInterface string) error {
 	if err := runCommand("ip", "link", "add", "name", bridgeName, "type", "bridge"); err != nil {
 		return fmt.Errorf("failed to create bridge: %v", err)
 	}
@@ -35,10 +35,6 @@ func createBridge(bridgeName string, ethInterface string, tapInterface string, a
 		return cleanupBridge(bridgeName, fmt.Errorf("failed to add %s to bridge: %v", ethInterface, err))
 	}
 
-	if err := runCommand("ip", "link", "set", "dev", ethInterface, "up"); err != nil {
-		return cleanupBridge(bridgeName, fmt.Errorf("failed to bring %s up: %v", ethInterface, err))
-	}
-
 	if err := runCommand("ip", "tuntap", "add", "dev", tapInterface, "mode", "tap"); err != nil {
 		return cleanupBridge(bridgeName, fmt.Errorf("failed to create tap interface: %v", err))
 	}
@@ -48,16 +44,14 @@ func createBridge(bridgeName string, ethInterface string, tapInterface string, a
 			fmt.Errorf("failed to add tap to bridge: %v", err)))
 	}
 
-	if err := runCommand("ip", "link", "set", tapInterface, "up"); err != nil {
+	if err := runCommand("ip", "link", "set", "dev", tapInterface, "up"); err != nil {
 		return cleanupTap(tapInterface, cleanupBridge(bridgeName,
 			fmt.Errorf("failed to bring tap up: %v", err)))
 	}
 
-	for _, address := range addresses {
-		if err := runCommand("ip", "addr", "del", address, "dev", ethInterface); err != nil {
-			return cleanupTap(tapInterface, cleanupBridge(bridgeName,
-				fmt.Errorf("failed to remove IP from %s: %v", ethInterface, err)))
-		}
+	if err := runCommand("ip", "address", "flush", "dev", ethInterface); err != nil {
+		return cleanupTap(tapInterface, cleanupBridge(bridgeName,
+			fmt.Errorf("failed to flush eth: %v", err)))
 	}
 
 	return nil

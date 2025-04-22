@@ -4,11 +4,60 @@
 
 ```mermaid
 flowchart TD
-    User -->|User,Password,SSHKeys| SetupCloudInit
-    User -->|VMDiskSize| SetupDisk
-    User -->|CPU,RAM| StartVM
+    RCE -->|User,Password,SSHKeys| SetupCloudInit
+    RCE -->|DiskSize| SetupDisk
+    RCE -->|CPU,RAM| StartVM
     SetupNetwork -->|Addresses,Gateway| SetupCloudInit
     SetupNetwork -->|NetworkParams| StartVM
     SetupDisk -->|DiskParams| StartVM
     SetupCloudInit -->|CloudInitParams| StartVM
+    RC[[RuntimeContainer]] -->|NetworkParams| SetupNetwork
+    IC[[ImageContainer]] -->|BaseImage| SetupDisk
+    RC --> RCE([RuntimeContainerEnv])
+```
+
+## Get container IP
+
+```sh
+docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' runtime
+```
+
+## Create TAP interface inside container
+
+Start container
+```sh
+docker run -it --name iptest --cap-add NET_ADMIN --device /dev/net/tun --device /dev/kvm alpine
+```
+
+Install iproute tool
+```sh
+apk add iproute2
+```
+
+Create bridge and tap interfaces
+```sh
+ip link add name br0 type bridge
+ip link set dev br0 up
+ip link set eth0 master br0
+ip tuntap add dev tap0 mode tap
+ip link set tap0 master br0
+ip link set dev tap0 up
+ip addr flush dev eth0
+```
+
+For debug add ip to bridge
+```sh
+ip addr add 172.17.0.2/16 dev br0
+ip route add default via 172.17.0.1
+```
+
+## Start QEMU inside container
+
+Test KVM
+```sh
+qemu-system-x86_64 \
+-m 2048 \
+-smp 2 \
+-enable-kvm \
+-nographic
 ```

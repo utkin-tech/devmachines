@@ -1,6 +1,3 @@
-# TODO: remove privileged: /dev/kvm, /dev/net/tun, NET_ADMIN
-# IDEA: may be need 2 networks
-
 services:
   runtime:
     container_name: runtime
@@ -8,7 +5,11 @@ services:
     volumes:
       - ./blobs:/blobs
       - image:/image:ro
-    privileged: true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun"
+      - "/dev/kvm"
     depends_on:
       ubuntu:
         condition: service_completed_successfully
