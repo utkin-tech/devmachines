@@ -61,3 +61,9 @@ qemu-system-x86_64 \
 -enable-kvm \
 -nographic
 ```
+
+## Inspect image content
+
+```sh
+docker run -ti --rm  -v /var/run/docker.sock:/var/run/docker.sock docker.io/wagoodman/dive devmachines/ubuntu
+```

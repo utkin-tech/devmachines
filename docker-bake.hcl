@@ -2,18 +2,19 @@ variable "GO_VERSION" {
     default = null
 }
 
-variable "DESTDIR" {
-    default = "./bin"
+variable "ALPINE_VERSION" {
+    default = null
 }
 
-variable "IMAGE" {
-    default = "erlnby/yadro-app"
+variable "DESTDIR" {
+    default = "./bin"
 }
 
 target "_common" {
     dockerfile = "runtime.Dockerfile"
     args = {
         GO_VERSION = GO_VERSION
+        ALPINE_VERSION = ALPINE_VERSION
         BUILDKIT_CONTEXT_KEEP_GIT_DIR = 1
     }
 }
@@ -28,7 +29,7 @@ target "runtime" {
 }
 
 target "ubuntu" {
-    dockerfile = "ubuntu.Dockerfile"
+    context = "./image"
     tags = ["devmachines/ubuntu"]
 }
 
