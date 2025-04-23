@@ -1,39 +1,62 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
+	"syscall"
+	"time"
 )
 
-// QEMUConfig holds configuration parameters for the QEMU virtual machine
-type QEMUConfig struct {
-	MemoryMB int       // Memory in megabytes (e.g., 2048)
-	CPUCores int       // Number of CPU cores (e.g., 2)
-	Output   io.Writer // Where to direct output (nil for default)
-	Wait     bool      // Whether to wait for VM to exit
+type ArgsFunc func() []string
+
+type VMParams interface {
+	Memory() uint
+	CPU() uint
 }
 
-func StartVM(config QEMUConfig, extraArgs ...string) error {
+func StartVM(ctx context.Context, params VMParams, out io.Writer, extraArgs []string) error {
 	args := []string{
-		"-m", fmt.Sprintf("%d", config.MemoryMB),
-		"-smp", fmt.Sprintf("%d", config.CPUCores),
+		"-m", fmt.Sprintf("%d", params.Memory()),
+		"-smp", fmt.Sprintf("%d", params.CPU()),
 		"-enable-kvm",
 		"-nographic",
 	}
 
 	args = append(args, extraArgs...)
 
-	cmd := exec.Command("qemu-system-x86_64", args...)
-	cmd.Stdout = config.Output
-	cmd.Stderr = config.Output
+	cmd := exec.CommandContext(ctx, "qemu-system-x86_64", args...)
+	cmd.Stdout = out
+	cmd.Stderr = out
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start QEMU: %w", err)
 	}
 
-	if config.Wait {
-		return cmd.Wait()
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	select {
+	case err := <-done:
+		return err
+	case <-ctx.Done():
+		if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			log.Printf("Error sending SIGTERM: %v", err)
+		}
+
+		select {
+		case <-done:
+			return nil
+		case <-time.After(10 * time.Second):
+			if err := cmd.Process.Kill(); err != nil {
+				log.Printf("Error killing process: %v", err)
+			}
+			<-done
+			return ctx.Err()
+		}
 	}
-	return nil
 }

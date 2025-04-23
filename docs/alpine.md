@@ -75,6 +75,8 @@ rc-update add sshd default
 exit
 ```
 
+To enable login promt uncomment line with ttyS0 in file /etc/inittab
+
 Unmount and disconnect:
 
 ```sh

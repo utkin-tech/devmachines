@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
+	"os/signal"
 
 	"github.com/utkin-tech/devmachines/cloudinit"
+	"github.com/utkin-tech/devmachines/config"
 	"github.com/utkin-tech/devmachines/disk"
 	"github.com/utkin-tech/devmachines/network"
 )
@@ -12,37 +16,40 @@ import (
 const InterfaceName = "eth0"
 
 func main() {
-	user := NewUser()
+	if err := run(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	env, err := config.LoadEnvironment()
+	if err != nil {
+		return fmt.Errorf("failed to load environment: %v", err)
+	}
+
+	cfg := config.NewConfig(env)
 
 	net, err := network.NewNetwork(InterfaceName)
 	if err != nil {
-		fmt.Printf("failed to get info about network: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get info about network: %v", err)
 	}
 
-	diskArgs, err := disk.SetupDisk(user)
+	diskArgs, err := disk.SetupDisk(cfg.Storage())
 	if err != nil {
-		fmt.Printf("failed to setup disk: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to setup disk: %v", err)
 	}
 
-	cloudInitArgs, err := cloudinit.SetupCloudInit(net, user)
+	cloudInitArgs, err := cloudinit.SetupCloudInit(net, cfg.User())
 	if err != nil {
-		fmt.Printf("failed to setup cloud-init: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to setup cloud-init: %v", err)
 	}
 
 	bridgeArgs, err := network.SetupBridge(net)
 	if err != nil {
-		fmt.Printf("failed to setup network bridge: %v\n", err)
-		return
-	}
-
-	config := QEMUConfig{
-		MemoryMB: 2048,
-		CPUCores: 2,
-		Output:   os.Stdout,
-		Wait:     true,
+		return fmt.Errorf("failed to setup network bridge: %v", err)
 	}
 
 	var args []string
@@ -50,8 +57,9 @@ func main() {
 	args = append(args, cloudInitArgs...)
 	args = append(args, bridgeArgs...)
 
-	if err := StartVM(config, args...); err != nil {
-		fmt.Printf("Error launching VM: %v\n", err)
-		os.Exit(1)
+	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
+		return fmt.Errorf("failed to launch VM: %v", err)
 	}
+
+	return nil
 }

@@ -2,6 +2,13 @@ services:
   runtime:
     container_name: runtime
     image: devmachines/runtime
+    environment:
+      CPU: "2"
+      MEMORY: "2G"
+      STORAGE: "10G"
+      USER: "user"
+      PASSWORD: "pass"
+      SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
     volumes:
       - ./blobs:/blobs
       - image:/image:ro

@@ -11,12 +11,12 @@ const (
 	DiskImagePath = "/blobs/disk.img"
 )
 
-type User interface {
-	DiskSize() string
+type Storage interface {
+	Size() string
 }
 
-func SetupDisk(user User) ([]string, error) {
-	err := createDiskImage(BaseImagePath, DiskImagePath, user.DiskSize())
+func SetupDisk(storage Storage) ([]string, error) {
+	err := createDiskImage(BaseImagePath, DiskImagePath, storage.Size())
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func SetupDisk(user User) ([]string, error) {
 	}, nil
 }
 
-func createDiskImage(baseImagePath, diskImagePath, diskSize string) error {
+func createDiskImage(baseImagePath string, diskImagePath string, diskSize string) error {
 	if _, err := os.Stat(baseImagePath); os.IsNotExist(err) {
 		return fmt.Errorf("base image %s does not exist", baseImagePath)
 	}
