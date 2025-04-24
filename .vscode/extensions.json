@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "golang.go",
-        "bierner.markdown-mermaid"
+        "bierner.markdown-mermaid",
+        "foxundermoon.shell-format"
     ]
 }

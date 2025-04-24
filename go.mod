@@ -4,6 +4,7 @@ go 1.24.2
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
+	github.com/digitalocean/go-qemu v0.0.0-20250212194115-ee9b0668d242
 	github.com/docker/go-units v0.5.0
 	github.com/go-playground/validator/v10 v10.26.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -11,6 +12,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/digitalocean/go-libvirt v0.0.0-20220804181439-8648fbde413e // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

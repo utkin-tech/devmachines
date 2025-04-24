@@ -3,6 +3,8 @@ package cloudinit
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/utkin-tech/devmachines/utils"
 )
 
 const CloudInitIsoPath = "/blobs/seed.iso"
@@ -29,8 +31,13 @@ func SetupCloudInit(network Network, user User) ([]string, error) {
 }
 
 func CreateISO(outputFile string, network Network, user User) error {
+	instanceID, err := utils.RandomHex(20)
+	if err != nil {
+		return err
+	}
+
 	metaDataPath, err := GenerateMetaData(&MetaData{
-		InstanceID:    "iid-local1",
+		InstanceID:    instanceID,
 		LocalHostname: "my-vm",
 	})
 	if err != nil {

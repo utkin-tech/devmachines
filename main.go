@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/utkin-tech/devmachines/cloudinit"
 	"github.com/utkin-tech/devmachines/config"
@@ -22,7 +22,7 @@ func main() {
 }
 
 func run() error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
 	env, err := config.LoadEnvironment()

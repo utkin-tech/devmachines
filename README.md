@@ -56,10 +56,24 @@ ip route add default via 172.17.0.1
 Test KVM
 ```sh
 qemu-system-x86_64 \
--m 2048 \
--smp 2 \
--enable-kvm \
--nographic
+    -m 2048 \
+    -smp 2 \
+    -enable-kvm \
+    -nographics
+```
+
+Start VM
+```sh
+qemu-system-x86_64 \
+    -m 2048 \
+    -smp 2 \
+    -drive file=/blobs/disk.img,format=qcow2,if=virtio \
+    -drive file=/blobs/seed.iso,format=raw,if=virtio \
+    -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net0 \
+    -qmp unix:/tmp/qmp-sock,server,wait=off \
+    -enable-kvm \
+    -nographic
 ```
 
 ## Inspect image content
