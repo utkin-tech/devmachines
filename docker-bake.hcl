@@ -11,7 +11,6 @@ variable "DESTDIR" {
 }
 
 target "_common" {
-    dockerfile = "runtime.Dockerfile"
     args = {
         GO_VERSION = GO_VERSION
         ALPINE_VERSION = ALPINE_VERSION

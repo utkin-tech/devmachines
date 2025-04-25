@@ -7,7 +7,7 @@ import (
 	"github.com/utkin-tech/devmachines/utils"
 )
 
-const CloudInitIsoPath = "/blobs/seed.iso"
+const CloudInitIsoPath = "/disks/cloudinit.iso"
 
 type Network interface {
 	Addresses() []string

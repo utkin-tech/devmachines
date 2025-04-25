@@ -8,7 +8,7 @@ import (
 
 const (
 	BaseImagePath = "/image/ubuntu.img"
-	DiskImagePath = "/blobs/disk.img"
+	DiskImagePath = "/disks/disk.img"
 )
 
 type Storage interface {

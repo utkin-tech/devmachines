@@ -41,13 +41,13 @@ flowchart TD
     BaseDisk --> Disk3[(VM 3 Disk)]
 ```
 
-Every `devmachines/runtime` container attempts to find an image file (in QCOW2 format) in the `/image` path (currently only `/image/ubuntu.img` is supported) and creates a VM disk in `/blobs` using the following command (example):
+Every `devmachines/runtime` container attempts to find an image file (in QCOW2 format) in the `/image` path (currently only `/image/ubuntu.img` is supported) and creates a VM disk in `/disks` using the following command (example):
 
 ```bash
-qemu-img create -b /image/ubuntu.img -F qcow2 -f qcow2 /blobs/disk.img 10G
+qemu-img create -b /image/ubuntu.img -F qcow2 -f qcow2 /disks/disk.img 10G
 ```
 
-You can configure the initial disk size using the `STORAGE` environment variable. It supports size definitions in [`docker/go-units`](https://pkg.go.dev/github.com/docker/go-units#RAMInBytes) format. If the file `/blobs/disk.img` already exists, `devmachines/runtime` takes no action, even if the `STORAGE` value has changed.
+You can configure the initial disk size using the `STORAGE` environment variable. It supports size definitions in [`docker/go-units`](https://pkg.go.dev/github.com/docker/go-units#RAMInBytes) format. If the file `/disks/disk.img` already exists, `devmachines/runtime` takes no action, even if the `STORAGE` value has changed.
 
 ## Setup Diagram
 
@@ -116,8 +116,8 @@ Start VM
 qemu-system-x86_64 \
     -m 2048 \
     -smp 2 \
-    -drive file=/blobs/disk.img,format=qcow2,if=virtio \
-    -drive file=/blobs/seed.iso,format=raw,if=virtio \
+    -drive file=/disks/disk.img,format=qcow2,if=virtio \
+    -drive file=/disks/cloudinit.iso,format=raw,if=virtio \
     -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
     -device virtio-net-pci,netdev=net0 \
     -qmp unix:/tmp/qmp-sock,server,wait=off \

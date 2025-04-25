@@ -10,7 +10,7 @@ services:
       PASSWORD: "pass"
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
     volumes:
-      - ./blobs:/blobs
+      - ./disks:/disks
       - image:/image:ro
     cap_add:
       - NET_ADMIN
