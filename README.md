@@ -1,5 +1,48 @@
 # DevMachines
 
+## Installation
+
+Just download `compose.yaml` and start docker:
+
+```sh
+wget https://raw.githubusercontent.com/utkin-tech/devmachines/refs/heads/main/compose.yaml
+docker compose up -d
+```
+
+## Configuration
+
+These variables are used to customize the runtime behavior of the `devmachines/runtime` Docker container. They can be passed via:  
+- `docker run -e VAR=value`  
+- Docker Compose `environment:` section
+
+| Env        | Default | Example          | Description                                |
+| ---------- | ------- | ---------------- | ------------------------------------------ |
+| `CPU`      | `-`     | `2`              | Number of CPU cores                        |
+| `MEMORY`   | `-`     | `2G`             | RAM size (supports `G` for GB, `M` for MB) |
+| `STORAGE`  | `-`     | `10G`            | Disk storage size (supports `G` for GB)    |
+| `USER`     | `-`     | `user`           | Default system username                    |
+| `PASSWORD` | `-`     | `pass`           | Default user password                      |
+| `SSH_KEYS` | `-`     | `ssh-ed25519...` | Comma-separated list of public SSH keys    |
+
+## Image and disk
+
+In `devmachines`, we use QEMU's `Backing File` function to reduce VM disk size. This allows us to reuse the same OS image across multiple VMs.
+
+```mermaid
+flowchart TD
+    BaseDisk[(Base Disk)] --> Disk1[(VM 1 Disk)]
+    BaseDisk --> Disk2[(VM 2 Disk)]
+    BaseDisk --> Disk3[(VM 3 Disk)]
+```
+
+Every `devmachines/runtime` container attempts to find an image file (in QCOW2 format) in the `/image` path (currently only `/image/ubuntu.img` is supported) and creates a VM disk in `/blobs` using the following command (example):
+
+```bash
+qemu-img create -b /image/ubuntu.img -F qcow2 -f qcow2 /blobs/disk.img 10G
+```
+
+You can configure the initial disk size using the `STORAGE` environment variable. It supports size definitions in [`docker/go-units`](https://pkg.go.dev/github.com/docker/go-units#RAMInBytes) format. If the file `/blobs/disk.img` already exists, `devmachines/runtime` takes no action, even if the `STORAGE` value has changed.
+
 ## Setup Diagram
 
 ```mermaid
