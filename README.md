@@ -1,11 +1,17 @@
 # DevMachines
 
+Run full-featured QEMU virtual machines inside Docker containers. This project brings together the flexibility of virtualization with the simplicity and portability of container workflows.
+
+Ideal for development, testing, CI/CD pipelines, embedded systems, and security research, it supports resource configuration, snapshot-based storage, and easy user/SSH setup—all manageable through standard Docker commands.
+
+Whether you're testing custom kernels, isolating untrusted code, or spinning up disposable dev environments, this solution makes managing VMs as easy as running containers.
+
 ## Installation
 
-Just download `compose.yaml` and start docker:
+Download the `compose.yaml` file and start the Docker environment:
 
 ```sh
-wget https://raw.githubusercontent.com/utkin-tech/devmachines/refs/heads/main/compose.yaml
+wget https://raw.githubusercontent.com/utkin-tech/devmachines/main/compose.yaml
 docker compose up -d
 ```
 
