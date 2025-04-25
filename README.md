@@ -65,6 +65,10 @@ flowchart TD
     RC --> RCE([RuntimeContainerEnv])
 ```
 
+## Setup Cloud Init
+
+For detailed information about the `SetupCloudInit` process, refer to the [cloudinit](/docs/cloudinit.md).
+
 ## Get container IP
 
 ```sh
