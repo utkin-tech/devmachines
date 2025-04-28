@@ -1,56 +1,45 @@
-# DevMachines
+# DevMachines: QEMU Virtual Machines in Docker Containers  
 
-Run full-featured QEMU virtual machines inside Docker containers. This project brings together the flexibility of virtualization with the simplicity and portability of container workflows.
+**Run full-featured virtual machines (VMs) inside Docker containers**—combining the isolation of virtualization with the portability of containers. Ideal for development, testing, CI/CD, embedded systems, and security research.  
 
-Ideal for development, testing, CI/CD pipelines, embedded systems, and security research, it supports resource configuration, snapshot-based storage, and easy user/SSH setup—all manageable through standard Docker commands.
+## 🔥 Key Features  
+✅ **VM-as-a-Container** – Manage VMs like containers (`docker run`, `docker compose`)  
+✅ **Configurable Resources** – Set CPU cores, RAM, and disk size via environment variables  
+✅ **Snapshot-Based Storage** – Ephemeral or persistent disk options  
+✅ **SSH & User Management** – Pre-configured users, passwords, and SSH keys  
+✅ **Cloud-Init Support** – Customize VM boot behavior (networking, packages, users)  
+✅ **Networking Flexibility** – Bridge, TAP, or NAT networking for advanced use cases  
 
-Whether you're testing custom kernels, isolating untrusted code, or spinning up disposable dev environments, this solution makes managing VMs as easy as running containers.
+## 🚀 Quick Start  
+1. Download the `compose.yaml`:  
+   ```sh
+   wget https://raw.githubusercontent.com/utkin-tech/devmachines/main/compose.yaml
+   docker compose up -d
+   ```
+2. Connect via SSH:  
+   ```sh
+   ssh root@$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' runtime)
+   ```
 
-## Installation
+## 📌 Use Cases  
+- **Developers**: Disposable dev environments with kernel/module testing  
+- **CI/CD**: Isolated build/test runners with VM-level reproducibility  
+- **Security Research**: Sandbox untrusted code in lightweight VMs  
+- **Embedded/IoT**: Emulate ARM/x86 devices in containers  
 
-Download the `compose.yaml` file and start the Docker environment:
+## ⚙️ Configuration  
+| Env        | Example          | Description                     |
+| ---------- | ---------------- | ------------------------------- |
+| `CPU`      | `2`              | CPU cores                       |
+| `MEMORY`   | `4G`             | RAM (supports `G`/`M`)          |
+| `STORAGE`  | `20G`            | Disk size (supports `G`)        |
+| `USER`     | `dev`            | Default username                |
+| `PASSWORD` | `secret`         | Default password                |
+| `SSH_KEYS` | `ssh-ed25519...` | Comma-separated public SSH keys |
 
-```sh
-wget https://raw.githubusercontent.com/utkin-tech/devmachines/main/compose.yaml
-docker compose up -d
-```
+## 📂 Docs & Architecture  
 
-## Configuration
-
-These variables are used to customize the runtime behavior of the `devmachines/runtime` Docker container. They can be passed via:  
-- `docker run -e VAR=value`  
-- Docker Compose `environment:` section
-
-| Env        | Default | Example          | Description                                |
-| ---------- | ------- | ---------------- | ------------------------------------------ |
-| `CPU`      | `-`     | `2`              | Number of CPU cores                        |
-| `MEMORY`   | `-`     | `2G`             | RAM size (supports `G` for GB, `M` for MB) |
-| `STORAGE`  | `-`     | `10G`            | Disk storage size (supports `G` for GB)    |
-| `USER`     | `-`     | `user`           | Default system username                    |
-| `PASSWORD` | `-`     | `pass`           | Default user password                      |
-| `SSH_KEYS` | `-`     | `ssh-ed25519...` | Comma-separated list of public SSH keys    |
-
-## Image and disk
-
-In `devmachines`, we use QEMU's `Backing File` function to reduce VM disk size. This allows us to reuse the same OS image across multiple VMs.
-
-```mermaid
-flowchart TD
-    BaseDisk[(Base Disk)] --> Disk1[(VM 1 Disk)]
-    BaseDisk --> Disk2[(VM 2 Disk)]
-    BaseDisk --> Disk3[(VM 3 Disk)]
-```
-
-Every `devmachines/runtime` container attempts to find an image file (in QCOW2 format) in the `/image` path (currently only `/image/ubuntu.img` is supported) and creates a VM disk in `/disks` using the following command (example):
-
-```bash
-qemu-img create -b /image/ubuntu.img -F qcow2 -f qcow2 /disks/disk.img 10G
-```
-
-You can configure the initial disk size using the `STORAGE` environment variable. It supports size definitions in [`docker/go-units`](https://pkg.go.dev/github.com/docker/go-units#RAMInBytes) format. If the file `/disks/disk.img` already exists, `devmachines/runtime` takes no action, even if the `STORAGE` value has changed.
-
-## Setup Diagram
-
+### System Diagram
 ```mermaid
 flowchart TD
     RCE -->|User,Password,SSHKeys| SetupCloudInit
@@ -60,77 +49,25 @@ flowchart TD
     SetupNetwork -->|NetworkParams| StartVM
     SetupDisk -->|DiskParams| StartVM
     SetupCloudInit -->|CloudInitParams| StartVM
-    RC[[RuntimeContainer]] -->|NetworkParams| SetupNetwork
-    IC[[ImageContainer]] -->|BaseImage| SetupDisk
-    RC --> RCE([RuntimeContainerEnv])
 ```
 
-## Setup Cloud Init
+### Details
+- [Networking Setup](/docs/networking.md) (Bridge/TAP)  
+- [Cloud-Init Integration](/docs/cloudinit.md)  
 
-For detailed information about the `SetupCloudInit` process, refer to the [cloudinit](/docs/cloudinit.md).
+## ❓ Why?  
+- **No Hypervisor Overhead**: Uses Docker’s native capabilities + KVM acceleration  
+- **Declarative Management**: Define VMs in `docker-compose.yml` like containers  
+- **Cross-Platform**: Works anywhere Docker runs (Linux, macOS/WSL2, cloud)  
 
-## Get container IP
+Yes! Adding licensing, author information, and contribution guidelines makes your project more transparent and professional. Here’s how to integrate these details into your repo description (typically in the `README.md`):
 
-```sh
-docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' runtime
-```
+## 📜 License  
+**DevMachines** is released under the **[MIT License](/LICENSE)**.  
 
-## Create TAP interface inside container
+## 👨‍💻 Author
+**Daniil Utkin** ([@erlnby](https://github.com/erlnby))  
+✉️ Email: [zolotoie@gmail.com](mailto:zolotoie@gmail.com)  
 
-Start container
-```sh
-docker run -it --name iptest --cap-add NET_ADMIN --device /dev/net/tun --device /dev/kvm alpine
-```
-
-Install iproute tool
-```sh
-apk add iproute2
-```
-
-Create bridge and tap interfaces
-```sh
-ip link add name br0 type bridge
-ip link set dev br0 up
-ip link set eth0 master br0
-ip tuntap add dev tap0 mode tap
-ip link set tap0 master br0
-ip link set dev tap0 up
-ip addr flush dev eth0
-```
-
-For debug add ip to bridge
-```sh
-ip addr add 172.17.0.2/16 dev br0
-ip route add default via 172.17.0.1
-```
-
-## Start QEMU inside container
-
-Test KVM
-```sh
-qemu-system-x86_64 \
-    -m 2048 \
-    -smp 2 \
-    -enable-kvm \
-    -nographics
-```
-
-Start VM
-```sh
-qemu-system-x86_64 \
-    -m 2048 \
-    -smp 2 \
-    -drive file=/disks/disk.img,format=qcow2,if=virtio \
-    -drive file=/disks/cloudinit.iso,format=raw,if=virtio \
-    -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-    -device virtio-net-pci,netdev=net0 \
-    -qmp unix:/tmp/qmp-sock,server,wait=off \
-    -enable-kvm \
-    -nographic
-```
-
-## Inspect image content
-
-```sh
-docker run -ti --rm  -v /var/run/docker.sock:/var/run/docker.sock docker.io/wagoodman/dive devmachines/ubuntu
-```
+## 🤝 Contributing  
+We welcome contributions! See [CONTRIBUTING.md](/CONTRIBUTING.md) for detailed guidelines.  

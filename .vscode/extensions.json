@@ -3,6 +3,7 @@
         "golang.go",
         "bierner.markdown-mermaid",
         "foxundermoon.shell-format",
-        "yzhang.markdown-all-in-one"
+        "yzhang.markdown-all-in-one",
+        "timonwong.shellcheck"
     ]
 }
