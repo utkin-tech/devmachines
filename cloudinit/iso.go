@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/utkin-tech/devmachines/network"
 	"github.com/utkin-tech/devmachines/utils"
 )
 
 const CloudInitIsoPath = "/disks/cloudinit.iso"
 
 type Network interface {
-	Addresses() []string
+	Addresses() []network.Addr
 	Gateway() string
 }
 
@@ -54,8 +55,13 @@ func CreateISO(outputFile string, network Network, user User) error {
 	}
 
 	ethernet := DefaultEthernet
-	ethernet.Addresses = network.Addresses()
 	ethernet.Gateway4 = network.Gateway()
+
+	var addresses []string
+	for _, addr := range network.Addresses() {
+		addresses = append(addresses, addr.CIDR)
+	}
+	ethernet.Addresses = addresses
 
 	networkConfig := NewNetworkConfig(&ethernet)
 	networkConfigPath, err := GenerateNetworkConfig(networkConfig)

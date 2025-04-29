@@ -12,8 +12,6 @@ RUN gcc -static -nostdlib -fno-builtin -o /exit0 exit0.c
 
 FROM scratch
 
-ADD https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img /ubuntu.img
-
-COPY --from=build /exit0 /exit0
+COPY --link --from=build /exit0 /exit0
 
 CMD ["/exit0"]

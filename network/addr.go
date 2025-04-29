@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os/exec"
 )
 
@@ -20,8 +21,13 @@ type NetworkInterface struct {
 	AddrInfo []IPAddrInfo `json:"addr_info"`
 }
 
-func GetAddressesByInterface(ifaceName string) ([]string, error) {
-	var addresses []string
+type Addr struct {
+	CIDR string
+	IP   net.IP
+}
+
+func GetAddressesByInterface(ifaceName string) ([]Addr, error) {
+	var addresses []Addr
 
 	cmd := exec.Command("ip", "-4", "-j", "address", "show", ifaceName)
 	output, err := cmd.CombinedOutput()
@@ -41,7 +47,12 @@ func GetAddressesByInterface(ifaceName string) ([]string, error) {
 
 	for _, addr := range iface.AddrInfo {
 		if addr.Family == "inet" && addr.Scope == "global" {
-			address := fmt.Sprintf("%s/%d", addr.Local, addr.Prefixlen)
+			cidr := fmt.Sprintf("%s/%d", addr.Local, addr.Prefixlen)
+			ip := net.ParseIP(addr.Local)
+			address := Addr{
+				CIDR: cidr,
+				IP:   ip,
+			}
 			addresses = append(addresses, address)
 		}
 	}

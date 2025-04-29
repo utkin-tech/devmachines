@@ -2,14 +2,14 @@ package network
 
 type Network interface {
 	InterfaceName() string
-	Addresses() []string
+	Addresses() []Addr
 	Gateway() string
 }
 
 type NetworkImpl struct {
-	name    string
-	address []string
-	gateway string
+	name      string
+	addresses []Addr
+	gateway   string
 }
 
 var _ Network = (*NetworkImpl)(nil)
@@ -26,9 +26,9 @@ func NewNetwork(interfaceName string) (*NetworkImpl, error) {
 	}
 
 	return &NetworkImpl{
-		name:    interfaceName,
-		address: addresses,
-		gateway: gateway,
+		name:      interfaceName,
+		addresses: addresses,
+		gateway:   gateway,
 	}, nil
 }
 
@@ -36,8 +36,8 @@ func (n *NetworkImpl) InterfaceName() string {
 	return n.name
 }
 
-func (n *NetworkImpl) Addresses() []string {
-	return n.address
+func (n *NetworkImpl) Addresses() []Addr {
+	return n.addresses
 }
 
 func (n *NetworkImpl) Gateway() string {

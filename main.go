@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -57,7 +58,7 @@ func run() error {
 	args = append(args, cloudInitArgs...)
 	args = append(args, bridgeArgs...)
 
-	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
+	if err := StartVM(ctx, cfg.VM(), os.Stdout, args); err != nil {
 		return fmt.Errorf("failed to launch VM: %v", err)
 	}
 
