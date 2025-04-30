@@ -12,19 +12,16 @@ services:
     volumes:
       - ./disks:/disks
       - image:/image:ro
-    # cap_add:
-    #   - NET_ADMIN
-    # devices:
-    #   - "/dev/net/tun"
-    #   - "/dev/kvm"
-    networks:
-      - net1
-      - net2
+      - socks:/socks
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun"
+      - "/dev/kvm"
     depends_on:
       ubuntu:
         condition: service_completed_successfully
     stop_grace_period: 60s
-    privileged: true
 
   ubuntu:
     image: devmachines/ubuntu:noble
@@ -34,14 +31,17 @@ services:
   novnc:
     image: devmachines/novnc
     ports:
-      - "6080:6080"
-    networks:
-      - net2
-    command: novnc_server --vnc runtime:5977
+      - "8080:6080"
+    command: novnc_server
 
-networks:
-  net1: {}
-  net2: {}
+  websockify:
+    image: devmachines/novnc
+    volumes:
+      - socks:/socks
+    ports:
+      - "6080:6080"
+    command: websockify --unix-target=/socks/vnc.sock 0.0.0.0:6080
 
 volumes:
   image: {}
+  socks: {}

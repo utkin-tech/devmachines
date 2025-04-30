@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"os/signal"
 	"syscall"
 
@@ -53,12 +52,23 @@ func run() error {
 		return fmt.Errorf("failed to setup network bridge: %v", err)
 	}
 
+	serialArgs := []string{
+		"-serial", "unix:/socks/serial.sock,server,nowait",
+	}
+
+	vncArgs := []string{
+		"-vga", "std",
+		"-vnc", "unix:/socks/vnc.sock",
+	}
+
 	var args []string
 	args = append(args, diskArgs...)
 	args = append(args, cloudInitArgs...)
 	args = append(args, bridgeArgs...)
+	args = append(args, serialArgs...)
+	args = append(args, vncArgs...)
 
-	if err := StartVM(ctx, cfg.VM(), os.Stdout, args); err != nil {
+	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
 		return fmt.Errorf("failed to launch VM: %v", err)
 	}
 
