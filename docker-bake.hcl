@@ -42,9 +42,3 @@ target "novnc" {
     context = "./novnc"
     tags = ["devmachines/novnc"]
 }
-
-
-target "exit0" {
-    context = "./image"
-    tags = ["devmachines/exit0"]
-}

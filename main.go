@@ -47,7 +47,12 @@ func run() error {
 		return fmt.Errorf("failed to setup cloud-init: %v", err)
 	}
 
-	bridgeArgs, err := network.SetupBridge(net)
+	// networkArgs, err := network.SetupBridge(net)
+	networkArgs, err := network.SetupNAT(network.Hostfwd{
+		Proto:     network.ProtoTcp,
+		Hostport:  "2222",
+		Guestport: "22",
+	})
 	if err != nil {
 		return fmt.Errorf("failed to setup network bridge: %v", err)
 	}
@@ -64,7 +69,7 @@ func run() error {
 	var args []string
 	args = append(args, diskArgs...)
 	args = append(args, cloudInitArgs...)
-	args = append(args, bridgeArgs...)
+	args = append(args, networkArgs...)
 	args = append(args, serialArgs...)
 	args = append(args, vncArgs...)
 

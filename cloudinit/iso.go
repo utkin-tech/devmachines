@@ -69,14 +69,22 @@ func CreateISO(outputFile string, network Network, user User) error {
 		return err
 	}
 
-	cmd := exec.Command(
-		"genisoimage",
+	args := []string{
 		"-o", outputFile,
 		"-volid", "cidata",
 		"-joliet", "-rock",
 		metaDataPath,
 		userDataPath,
-		networkConfigPath,
+	}
+
+	addNetwork := false
+	if addNetwork {
+		args = append(args, networkConfigPath)
+	}
+
+	cmd := exec.Command(
+		"genisoimage",
+		args...,
 	)
 
 	output, err := cmd.CombinedOutput()

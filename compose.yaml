@@ -11,22 +11,19 @@ services:
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
     volumes:
       - ./disks:/disks
-      - image:/image:ro
       - socks:/socks
+      - type: image
+        source: devmachines/ubuntu:noble
+        target: /image
+        read_only: true
     cap_add:
       - NET_ADMIN
     devices:
       - "/dev/net/tun"
       - "/dev/kvm"
-    depends_on:
-      ubuntu:
-        condition: service_completed_successfully
+    ports:
+      - "2222:2222"
     stop_grace_period: 60s
-
-  ubuntu:
-    image: devmachines/ubuntu:noble
-    volumes:
-      - image:/image
 
   novnc:
     image: devmachines/novnc
@@ -43,5 +40,4 @@ services:
     command: websockify --unix-target=/socks/vnc.sock 0.0.0.0:6080
 
 volumes:
-  image: {}
   socks: {}
