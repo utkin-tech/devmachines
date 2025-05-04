@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/utkin-tech/devmachines/network"
 	"github.com/utkin-tech/devmachines/utils"
 )
 
 const CloudInitIsoPath = "/disks/cloudinit.iso"
 
-type Network interface {
-	Addresses() []network.Addr
+type Addr interface {
+	CIDR() string
+}
+
+type Network[T Addr] interface {
+	Addresses() []T
 	Gateway() string
 }
 
@@ -21,7 +24,7 @@ type User interface {
 	SSHKeys() []string
 }
 
-func SetupCloudInit(network Network, user User) ([]string, error) {
+func SetupCloudInit[T Addr](network Network[T], user User) ([]string, error) {
 	if err := CreateISO(CloudInitIsoPath, network, user); err != nil {
 		return nil, err
 	}
@@ -31,7 +34,7 @@ func SetupCloudInit(network Network, user User) ([]string, error) {
 	}, nil
 }
 
-func CreateISO(outputFile string, network Network, user User) error {
+func CreateISO[T Addr](outputFile string, network Network[T], user User) error {
 	instanceID, err := utils.RandomHex(20)
 	if err != nil {
 		return err
@@ -59,7 +62,7 @@ func CreateISO(outputFile string, network Network, user User) error {
 
 	var addresses []string
 	for _, addr := range network.Addresses() {
-		addresses = append(addresses, addr.CIDR)
+		addresses = append(addresses, addr.CIDR())
 	}
 	ethernet.Addresses = addresses
 

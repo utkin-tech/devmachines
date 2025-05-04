@@ -1,18 +1,18 @@
 package network
 
-type Network interface {
+type Network[T Addr] interface {
 	InterfaceName() string
-	Addresses() []Addr
+	Addresses() []T
 	Gateway() string
 }
 
 type NetworkImpl struct {
 	name      string
-	addresses []Addr
+	addresses []*AddrImpl
 	gateway   string
 }
 
-var _ Network = (*NetworkImpl)(nil)
+var _ Network[*AddrImpl] = (*NetworkImpl)(nil)
 
 func NewNetwork(interfaceName string) (*NetworkImpl, error) {
 	addresses, err := GetAddressesByInterface(interfaceName)
@@ -36,7 +36,7 @@ func (n *NetworkImpl) InterfaceName() string {
 	return n.name
 }
 
-func (n *NetworkImpl) Addresses() []Addr {
+func (n *NetworkImpl) Addresses() []*AddrImpl {
 	return n.addresses
 }
 

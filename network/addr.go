@@ -21,13 +21,28 @@ type NetworkInterface struct {
 	AddrInfo []IPAddrInfo `json:"addr_info"`
 }
 
-type Addr struct {
-	CIDR string
-	IP   net.IP
+type Addr interface {
+	CIDR() string
+	IP() net.IP
 }
 
-func GetAddressesByInterface(ifaceName string) ([]Addr, error) {
-	var addresses []Addr
+type AddrImpl struct {
+	cidr string
+	ip   net.IP
+}
+
+func (a *AddrImpl) CIDR() string {
+	return a.cidr
+}
+
+func (a *AddrImpl) IP() net.IP {
+	return a.ip
+}
+
+var _ Addr = (*AddrImpl)(nil)
+
+func GetAddressesByInterface(ifaceName string) ([]*AddrImpl, error) {
+	var addresses []*AddrImpl
 
 	cmd := exec.Command("ip", "-4", "-j", "address", "show", ifaceName)
 	output, err := cmd.CombinedOutput()
@@ -49,11 +64,11 @@ func GetAddressesByInterface(ifaceName string) ([]Addr, error) {
 		if addr.Family == "inet" && addr.Scope == "global" {
 			cidr := fmt.Sprintf("%s/%d", addr.Local, addr.Prefixlen)
 			ip := net.ParseIP(addr.Local)
-			address := Addr{
-				CIDR: cidr,
-				IP:   ip,
+			address := AddrImpl{
+				cidr: cidr,
+				ip:   ip,
 			}
-			addresses = append(addresses, address)
+			addresses = append(addresses, &address)
 		}
 	}
 

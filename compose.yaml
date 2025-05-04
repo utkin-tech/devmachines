@@ -11,7 +11,6 @@ services:
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
     volumes:
       - ./disks:/disks
-      - socks:/socks
       - type: image
         source: devmachines/ubuntu:noble
         target: /image
@@ -28,16 +27,5 @@ services:
   novnc:
     image: devmachines/novnc
     ports:
-      - "8080:6080"
-    command: novnc_server
-
-  websockify:
-    image: devmachines/novnc
-    volumes:
-      - socks:/socks
-    ports:
       - "6080:6080"
-    command: websockify --unix-target=/socks/vnc.sock 0.0.0.0:6080
-
-volumes:
-  socks: {}
+    command: novnc_server --vnc runtime:5977

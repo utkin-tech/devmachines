@@ -11,7 +11,7 @@ const (
 	TapInterface = "tap0"
 )
 
-func SetupBridge(net Network) ([]string, error) {
+func SetupBridge[T Addr](net Network[T]) ([]string, error) {
 	if err := createBridge(BridgeName, net.InterfaceName(), TapInterface); err != nil {
 		return nil, err
 	}

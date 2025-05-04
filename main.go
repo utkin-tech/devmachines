@@ -63,7 +63,8 @@ func run() error {
 
 	vncArgs := []string{
 		"-vga", "std",
-		"-vnc", "unix:/socks/vnc.sock",
+		// "-vnc", "unix:/socks/vnc.sock",
+		"-vnc", "0.0.0.0:77",
 	}
 
 	var args []string
