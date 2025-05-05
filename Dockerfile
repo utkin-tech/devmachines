@@ -26,6 +26,6 @@ FROM alpine:${ALPINE_VERSION}
 
 RUN apk add qemu-system-x86_64 qemu-img iproute2 cdrkit
 
-COPY --from=binary /devmachines-runtime /devmachines-runtime
+COPY --link --from=binary /devmachines-runtime /devmachines-runtime
 
 CMD ["/devmachines-runtime"]

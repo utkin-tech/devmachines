@@ -9,23 +9,24 @@ services:
       USER: "user"
       PASSWORD: "pass"
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
+      VNC: ":77"
     volumes:
       - ./disks:/disks
-      - image:/image:ro
+      - type: image
+        source: devmachines/ubuntu:noble
+        target: /image
+        read_only: true
     cap_add:
       - NET_ADMIN
     devices:
       - "/dev/net/tun"
       - "/dev/kvm"
-    depends_on:
-      ubuntu:
-        condition: service_completed_successfully
+    ports:
+      - "2222:2222"
     stop_grace_period: 60s
 
-  ubuntu:
-    image: devmachines/ubuntu
-    volumes:
-      - image:/image
-
-volumes:
-  image: {}
+  novnc:
+    image: devmachines/novnc
+    ports:
+      - "6080:6080"
+    command: novnc_server --vnc runtime:5977

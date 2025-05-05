@@ -29,31 +29,62 @@
 - **Embedded/IoT**: Emulate ARM/x86 devices in containers  
 
 ## ⚙️ Configuration  
-| Env        | Example          | Description                     |
-| ---------- | ---------------- | ------------------------------- |
-| `CPU`      | `2`              | CPU cores                       |
-| `MEMORY`   | `4G`             | RAM (supports `G`/`M`)          |
-| `STORAGE`  | `20G`            | Disk size (supports `G`)        |
-| `USER`     | `dev`            | Default username                |
-| `PASSWORD` | `secret`         | Default password                |
-| `SSH_KEYS` | `ssh-ed25519...` | Comma-separated public SSH keys |
+| Env        | Example          | Validation             | Default | Description                     |
+| ---------- | ---------------- | ---------------------- | ------- | ------------------------------- |
+| `CPU`      | `2`              | required               |         | CPU cores                       |
+| `MEMORY`   | `4G`             | required, validBytes   |         | RAM                             |
+| `STORAGE`  | `20G`            | required, validBytes   |         | Disk size                       |
+| `USER`     | `dev`            | required               |         | Default username                |
+| `PASSWORD` | `secret`         | required               |         | Default password                |
+| `SSH_KEYS` | `ssh-ed25519...` | required               |         | Comma-separated public SSH keys |
+| `NETWORK`  |                  | required, validNetwork | `NAT`   | Network type                    |
+| `VNC`      | `:77`            |                        |         | QEMU-style argument for `-vnc`  |
+
+### Valid Bytes
+
+The values for `MEMORY` and `STORAGE` must be human-readable strings representing sizes in bytes. Supported suffixes include: `K` (kibibytes), `M` (mebibytes), `G` (gibibytes), and `T` (tebibytes). Units are case-insensitive and the `b` suffix is optional.
+
+### Valid Network
+
+Valid values for `NETWORK` are `NAT` and `BRIDGE`.
 
 ## 📂 Docs & Architecture  
 
 ### System Diagram
 
 ```mermaid
+%%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
 flowchart TD
-    RCE -->|User,Password,SSHKeys| SetupCloudInit
-    RCE -->|DiskSize| SetupDisk
-    RCE -->|CPU,RAM| StartVM
-    SetupNetwork -->|Addresses,Gateway| SetupCloudInit
-    SetupNetwork -->|NetworkParams| StartVM
-    SetupDisk -->|DiskParams| StartVM
-    SetupCloudInit -->|CloudInitParams| StartVM
-    RC[[RuntimeContainer]] -->|NetworkParams| SetupNetwork
-    IC[[ImageContainer]] -->|BaseImage| SetupDisk
+    RC[[RuntimeContainer]] -->|NetworkParams| GetNetworkInfo
     RC --> RCE([RuntimeContainerEnv])
+
+    GetNetworkInfo --> SetupNetwork
+    GetNetworkInfo --> SetupCloudInit
+
+    RCE -->|USER,PASSWORD,SSH_KEYS| SetupCloudInit
+    RCE -->|STORAGE| SetupDisk
+    RCE -->|CPU,MEMORY| StartVM
+    RCE -.->|VNC| SetupVNC
+    RCE -->|NETWORK| GetNetworkInfo
+
+    subgraph Args Providers
+    SetupNetwork
+    SetupCloudInit
+    SetupVNC
+    SetupDisk
+    end
+    
+    %% Start VM Args
+    SetupNetwork -->|Network Args| StartVM
+    SetupDisk -->|Disk Args| StartVM
+    SetupCloudInit -->|CloudInit Args| StartVM
+    SetupVNC -.->|VNC Args| StartVM
+
+    %% Disks
+    Disk[(Disk)] --> SetupDisk
+    BaseDisk[(Base Disk)] --> SetupDisk
+    BaseDisk ---> Disk
+
 ```
 
 ### Details

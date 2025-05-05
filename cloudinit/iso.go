@@ -9,8 +9,12 @@ import (
 
 const CloudInitIsoPath = "/disks/cloudinit.iso"
 
-type Network interface {
-	Addresses() []string
+type Addr interface {
+	CIDR() string
+}
+
+type Network[T Addr] interface {
+	Addresses() []T
 	Gateway() string
 }
 
@@ -20,7 +24,7 @@ type User interface {
 	SSHKeys() []string
 }
 
-func SetupCloudInit(network Network, user User) ([]string, error) {
+func SetupCloudInit[T Addr](network Network[T], user User) ([]string, error) {
 	if err := CreateISO(CloudInitIsoPath, network, user); err != nil {
 		return nil, err
 	}
@@ -30,7 +34,7 @@ func SetupCloudInit(network Network, user User) ([]string, error) {
 	}, nil
 }
 
-func CreateISO(outputFile string, network Network, user User) error {
+func CreateISO[T Addr](outputFile string, network Network[T], user User) error {
 	instanceID, err := utils.RandomHex(20)
 	if err != nil {
 		return err
@@ -54,8 +58,13 @@ func CreateISO(outputFile string, network Network, user User) error {
 	}
 
 	ethernet := DefaultEthernet
-	ethernet.Addresses = network.Addresses()
 	ethernet.Gateway4 = network.Gateway()
+
+	var addresses []string
+	for _, addr := range network.Addresses() {
+		addresses = append(addresses, addr.CIDR())
+	}
+	ethernet.Addresses = addresses
 
 	networkConfig := NewNetworkConfig(&ethernet)
 	networkConfigPath, err := GenerateNetworkConfig(networkConfig)
@@ -63,14 +72,22 @@ func CreateISO(outputFile string, network Network, user User) error {
 		return err
 	}
 
-	cmd := exec.Command(
-		"genisoimage",
+	args := []string{
 		"-o", outputFile,
 		"-volid", "cidata",
 		"-joliet", "-rock",
 		metaDataPath,
 		userDataPath,
-		networkConfigPath,
+	}
+
+	addNetwork := false
+	if addNetwork {
+		args = append(args, networkConfigPath)
+	}
+
+	cmd := exec.Command(
+		"genisoimage",
+		args...,
 	)
 
 	output, err := cmd.CombinedOutput()

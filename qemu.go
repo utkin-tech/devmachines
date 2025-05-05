@@ -76,7 +76,7 @@ func StartVM(ctx context.Context, params VMParams, out io.Writer, extraArgs []st
 		select {
 		case <-done:
 			return nil
-		case <-time.After(60 * time.Second):
+		case <-time.After(40 * time.Second):
 			if err := cmd.Process.Kill(); err != nil {
 				log.Printf("Error killing process: %v", err)
 			}
