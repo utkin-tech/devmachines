@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/caarlos0/env"
+	"github.com/docker/go-connections/nat"
 	"github.com/docker/go-units"
 	"github.com/go-playground/validator/v10"
 )
@@ -24,6 +25,7 @@ type Environment struct {
 	SSHKeys  []string    `env:"SSH_KEYS" validate:"required"`
 	Network  NetworkType `env:"NETWORK" validate:"required,validNetwork" envDefault:"NAT"`
 	VNC      string      `env:"VNC"`
+	Ports    []string    `env:"PORTS" validate:"required,validPorts"`
 }
 
 func LoadEnvironment() (*Environment, error) {
@@ -36,7 +38,8 @@ func LoadEnvironment() (*Environment, error) {
 	validate := validator.New()
 
 	validate.RegisterValidation("validBytes", validateBytes)
-	validate.RegisterValidation("validNetwork", validNetwork)
+	validate.RegisterValidation("validNetwork", validateNetwork)
+	validate.RegisterValidation("validPorts", validatePorts)
 
 	if err := validate.Struct(cfg); err != nil {
 		return nil, fmt.Errorf("failed validate config: %w", err)
@@ -50,7 +53,21 @@ func validateBytes(fl validator.FieldLevel) bool {
 	return err == nil
 }
 
-func validNetwork(fl validator.FieldLevel) bool {
+func validateNetwork(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	return value == NetworkTypeNat || value == NetworkTypeBridge
+}
+
+func validatePorts(fl validator.FieldLevel) bool {
+	ports := fl.Field()
+
+	for i := range ports.Len() {
+		port := ports.Index(i).String()
+		_, err := nat.ParsePortSpec(port)
+		if err != nil {
+			return false
+		}
+	}
+
+	return true
 }

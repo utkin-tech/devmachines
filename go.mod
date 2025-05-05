@@ -5,6 +5,7 @@ go 1.24.2
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/digitalocean/go-qemu v0.0.0-20250212194115-ee9b0668d242
+	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/go-playground/validator/v10 v10.26.0
 	gopkg.in/yaml.v3 v3.0.1
