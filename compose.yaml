@@ -9,6 +9,7 @@ services:
       USER: "user"
       PASSWORD: "pass"
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
+      VNC: ":77"
     volumes:
       - ./disks:/disks
       - type: image

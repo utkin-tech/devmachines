@@ -28,14 +28,25 @@
 - **Embedded/IoT**: Emulate ARM/x86 devices in containers  
 
 ## ⚙️ Configuration  
-| Env        | Example          | Description                     |
-| ---------- | ---------------- | ------------------------------- |
-| `CPU`      | `2`              | CPU cores                       |
-| `MEMORY`   | `4G`             | RAM (supports `G`/`M`)          |
-| `STORAGE`  | `20G`            | Disk size (supports `G`)        |
-| `USER`     | `dev`            | Default username                |
-| `PASSWORD` | `secret`         | Default password                |
-| `SSH_KEYS` | `ssh-ed25519...` | Comma-separated public SSH keys |
+| Env        | Example          | Validation             | Default | Description                     |
+| ---------- | ---------------- | ---------------------- | ------- | ------------------------------- |
+| `CPU`      | `2`              | required               |         | CPU cores                       |
+| `MEMORY`   | `4G`             | required, validBytes   |         | RAM                             |
+| `STORAGE`  | `20G`            | required, validBytes   |         | Disk size                       |
+| `USER`     | `dev`            | required               |         | Default username                |
+| `PASSWORD` | `secret`         | required               |         | Default password                |
+| `SSH_KEYS` | `ssh-ed25519...` | required               |         | Comma-separated public SSH keys |
+| `NETORK`   |                  | required, validNetwork | `NAT`   | Network type                    |
+| `VNC`      | `:77`            |                        |         | QEMU style argument for `-vnc`  |
+
+
+### Valid Bytes
+
+Value for `MEMORY` and `STORAGE` parses a human-readable string representing an amount size in bytes. Supported prefixes: `K` for kibibytes, `M` for mebibytes, `G` for gibibytes, and `T` for tebibytes. Units are case-insensitive, and the 'b' suffix is optional.
+
+### Valid Network
+
+`NAT` and `BRIDGE` are valid values.
 
 ## 📂 Docs & Architecture  
 
