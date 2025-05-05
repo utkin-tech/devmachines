@@ -18,7 +18,8 @@
    ```
 2. Connect via SSH:  
    ```sh
-   ssh root@$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' runtime)
+   VM_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{break}}{{end}}' runtime)
+   ssh user@"$VM_IP"
    ```
 
 ## 📌 Use Cases  
@@ -51,6 +52,7 @@ Value for `MEMORY` and `STORAGE` parses a human-readable string representing an 
 ## 📂 Docs & Architecture  
 
 ### System Diagram
+
 ```mermaid
 flowchart TD
     RCE -->|User,Password,SSHKeys| SetupCloudInit
@@ -60,6 +62,9 @@ flowchart TD
     SetupNetwork -->|NetworkParams| StartVM
     SetupDisk -->|DiskParams| StartVM
     SetupCloudInit -->|CloudInitParams| StartVM
+    RC[[RuntimeContainer]] -->|NetworkParams| SetupNetwork
+    IC[[ImageContainer]] -->|BaseImage| SetupDisk
+    RC --> RCE([RuntimeContainerEnv])
 ```
 
 ### Details
