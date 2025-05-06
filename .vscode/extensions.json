@@ -4,6 +4,7 @@
         "bierner.markdown-mermaid",
         "foxundermoon.shell-format",
         "yzhang.markdown-all-in-one",
-        "timonwong.shellcheck"
+        "timonwong.shellcheck",
+        "shardulm94.trailing-spaces"
     ]
 }
