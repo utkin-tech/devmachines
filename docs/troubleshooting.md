@@ -31,3 +31,41 @@ qemu-system-x86_64 \
 ```sh
 docker run -ti --rm  -v /var/run/docker.sock:/var/run/docker.sock docker.io/wagoodman/dive devmachines/ubuntu
 ```
+
+## Inspect Qcow2 image
+
+```sh
+sudo modprobe nbd
+```
+
+```sh
+sudo qemu-nbd --connect=/dev/nbd0 file.qcow2
+```
+
+```sh
+sudo fdisk -l /dev/nbd0
+```
+
+```sh
+sudo mount /dev/nbd0p1 /mnt
+```
+
+```sh
+sudo umount /mnt
+sudo qemu-nbd --disconnect /dev/nbd0
+```
+
+## Inspect ISO
+
+Make `raw` from `qcow2` (optional):
+```sh
+qemu-img convert -f qcow2 -O raw file.qcow2 file.raw
+```
+
+```sh
+sudo mount -o loop file.raw /mnt
+```
+
+```sh
+sudo umount /mnt
+```

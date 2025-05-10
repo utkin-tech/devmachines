@@ -1,0 +1,30 @@
+services:
+  runtime:
+    container_name: runtime
+    image: devmachines/runtime
+    environment:
+      CPU: "2"
+      MEMORY: "2G"
+      STORAGE: "10G"
+      USER: "user"
+      PASSWORD: "pass"
+      SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
+      VNC: ":77"
+      PORTS: "2222:22"
+    volumes:
+      - ./disks:/disks
+      - type: image
+        source: devmachines/alpine
+        target: /image
+      - ./docs/detached-kernel-experiment/blobs:/kernel:ro
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    devices:
+      - "/dev/net/tun"
+      - "/dev/kvm"
+    ports:
+      - "2222:2222"
+    stop_grace_period: 60s
+    command: sleep infinity
+    privileged: true

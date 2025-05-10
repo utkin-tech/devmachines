@@ -32,6 +32,11 @@ target "ubuntu" {
     tags = ["devmachines/ubuntu:24.04", "devmachines/ubuntu:noble"]
 }
 
+target "alpine" {
+    context = "./image/alpine"
+    tags = ["devmachines/alpine"]
+}
+
 target "binariy" {
     inherits = ["_common"]
     target = "binary"
