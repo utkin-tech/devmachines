@@ -14,20 +14,17 @@ services:
     volumes:
       - ./disks:/disks
       - type: image
-        source: devmachines/ubuntu:noble
+        source: devmachines/alpine
         target: /image
-        read_only: true
+      - ./docs/detached-kernel-experiment/blobs:/kernel:ro
     cap_add:
       - NET_ADMIN
+      - SYS_ADMIN
     devices:
       - "/dev/net/tun"
       - "/dev/kvm"
     ports:
       - "2222:2222"
     stop_grace_period: 60s
-
-  novnc:
-    image: devmachines/novnc
-    ports:
-      - "6080:6080"
-    command: novnc_server --vnc runtime:5977
+    command: sleep infinity
+    privileged: true

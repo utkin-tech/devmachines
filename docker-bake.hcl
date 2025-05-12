@@ -6,6 +6,14 @@ variable "ALPINE_VERSION" {
     default = null
 }
 
+variable "UBUNTU_VERSION" {
+    default = 24.04
+}
+
+variable "UBUNTU_CODENAME" {
+    default = "noble"
+}
+
 variable "DESTDIR" {
     default = "./bin"
 }
@@ -28,8 +36,16 @@ target "runtime" {
 }
 
 target "ubuntu" {
-    context = "./image/ubuntu/24.04"
-    tags = ["devmachines/ubuntu:24.04", "devmachines/ubuntu:noble"]
+    context = "./images/image/ubuntu/${UBUNTU_VERSION}"
+    tags = ["devmachines/ubuntu:${UBUNTU_VERSION}", "devmachines/ubuntu:${UBUNTU_CODENAME}"]
+}
+
+target "alpine" {
+    context = "./images/rootfs/alpine"
+    args = {
+        ALPINE_VERSION = ALPINE_VERSION
+    }
+    tags = ["devmachines/alpine"]
 }
 
 target "binariy" {

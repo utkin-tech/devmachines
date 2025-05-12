@@ -57,11 +57,7 @@ func run() error {
 	case config.NetworkTypeBridge:
 		networkArgs, err = network.SetupBridge(net)
 	case config.NetworkTypeNat:
-		networkArgs, err = network.SetupNAT(network.Hostfwd{
-			Proto:     network.ProtoTcp,
-			Hostport:  "2222",
-			Guestport: "22",
-		})
+		networkArgs, err = network.SetupNAT(env.Ports)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to setup network: %v", err)

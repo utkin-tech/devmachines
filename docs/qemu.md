@@ -42,3 +42,14 @@ Unix socket arguments:
 -vga std \
 -vnc unix:/socks/vnc.sock \
 ```
+
+## Minimal
+
+```sh
+qemu-system-x86_64 \
+  -enable-kvm -smp 2 \
+  -m 2G \
+  -nographic \
+  -drive if=virtio,file=disk2.img \
+  -drive file=cloudinit.iso,format=raw,if=virtio
+```
