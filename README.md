@@ -1,16 +1,16 @@
 # DevMachines: QEMU Virtual Machines in Docker Containers
 
-**Run full-featured virtual machines (VMs) inside Docker containers**—combining the isolation of virtualization with the portability of containers. Ideal for development, testing, CI/CD, embedded systems, and security research.
+**Run full-featured virtual machines (VMs) inside Docker containers**—combining the isolation of virtualization with the portability of containers. Ideal for development, testing, CI/CD, and security research.
 
-## 🔥 Key Features
-✅ **VM-as-a-Container** – Manage VMs like containers (`docker run`, `docker compose`)
-✅ **Configurable Resources** – Set CPU cores, RAM, and disk size via environment variables
-✅ **Snapshot-Based Storage** – Ephemeral or persistent disk options
-✅ **SSH & User Management** – Pre-configured users, passwords, and SSH keys
-✅ **Cloud-Init Support** – Customize VM boot behavior (networking, packages, users)
-✅ **Networking Flexibility** – Bridge, TAP, or NAT networking for advanced use cases
+## Key Features
+- **VM-as-a-Container** – Manage VMs like containers (`docker run`, `docker compose`)
+- **Configurable Resources** – Set CPU cores, RAM, and disk size via environment variables
+- **Snapshot-Based Storage** – Ephemeral or persistent disk options
+- **SSH & User Management** – Pre-configured users, passwords, and SSH keys
+- **Cloud-Init Support** – Customize VM boot behavior (networking, packages, users)
+- **Networking Flexibility** – Bridge or NAT networking for advanced use cases
 
-## 🚀 Quick Start
+## Quick Start
 1. Download the `compose.yaml`:
    ```sh
    wget https://raw.githubusercontent.com/utkin-tech/devmachines/main/compose.yaml
@@ -22,38 +22,53 @@
    ssh user@"$VM_IP"
    ```
 
-## 📌 Use Cases
+## Use Cases
 - **Developers**: Disposable dev environments with kernel/module testing
 - **CI/CD**: Isolated build/test runners with VM-level reproducibility
 - **Security Research**: Sandbox untrusted code in lightweight VMs
-- **Embedded/IoT**: Emulate ARM/x86 devices in containers
 
-## ⚙️ Configuration
-| Env        | Example          | Validation             | Default | Description                      |
-| ---------- | ---------------- | ---------------------- | ------- | -------------------------------- |
-| `CPU`      | `2`              | required               |         | CPU cores                        |
-| `MEMORY`   | `4G`             | required, validBytes   |         | RAM                              |
-| `STORAGE`  | `20G`            | required, validBytes   |         | Disk size                        |
-| `USER`     | `dev`            | required               |         | Default username                 |
-| `PASSWORD` | `secret`         | required               |         | Default password                 |
-| `SSH_KEYS` | `ssh-ed25519...` | required               |         | Comma-separated public SSH keys  |
-| `NETWORK`  |                  | required, validNetwork | `NAT`   | Network type                     |
-| `VNC`      | `:77`            |                        |         | QEMU-style argument for `-vnc`   |
-| `PORTS`    | `2222:22`        | validPorts             |         | Read [Valid Ports](#valid-ports) |
+## Configuration
+
+| Env        | Example          | Validation             | Default | Description                                     |
+| ---------- | ---------------- | ---------------------- | ------- | ----------------------------------------------- |
+| `CPU`      | `2`              | required               |         | CPU cores                                       |
+| `MEMORY`   | `4G`             | required, validBytes   |         | RAM size                                        |
+| `STORAGE`  | `20G`            | required, validBytes   |         | Disk storage size                               |
+| `USER`     | `dev`            | required               |         | Default username                                |
+| `PASSWORD` | `secret`         | required               |         | Default password                                |
+| `SSH_KEYS` | `ssh-ed25519...` | required               |         | Comma-separated public SSH keys                 |
+| `NETWORK`  |                  | required, validNetwork | `NAT`   | Network type                                    |
+| `VNC`      | `:77`            |                        |         | QEMU-style argument for `-vnc`                  |
+| `PORTS`    | `2222:22`        | validPorts             |         | Port mappings (see [Valid Ports](#valid-ports)) |
 
 ### Valid Bytes
 
-The values for `MEMORY` and `STORAGE` must be human-readable strings representing sizes in bytes. Supported suffixes include: `K` (kibibytes), `M` (mebibytes), `G` (gibibytes), and `T` (tebibytes). Units are case-insensitive and the `b` suffix is optional. For validation used `units.RAMInBytes` from `github.com/docker/go-units`.
+Values for `MEMORY` and `STORAGE` must be human-readable strings representing sizes in bytes. Supported suffixes:
+- `K` (kibibytes)
+- `M` (mebibytes)
+- `G` (gibibytes)
+- `T` (tebibytes)
+
+Notes:
+- Units are case-insensitive
+- The `b` suffix is optional (e.g., `4G` and `4GB` are equivalent)
+- Validation uses `units.RAMInBytes` from `github.com/docker/go-units`
 
 ### Valid Network
 
-Valid values for `NETWORK` are `NAT` and `BRIDGE`.
+Accepted values for `NETWORK`:
+- `NAT` (default)
+- `BRIDGE`
 
 ### Valid Ports
 
-Comma-separated Docker-style ports mapping. Have effect only when `NETWORK` is `NAT`. For validation used `nat.ParsePortSpec` from `github.com/docker/go-connections/nat`.
+Comma-separated Docker-style port mappings (e.g., `2222:22,8080:80`).
 
-## 📂 Docs & Architecture
+Notes:
+- Only takes effect when `NETWORK` is set to `NAT`.
+- Validation uses `nat.ParsePortSpec` from `github.com/docker/go-connections/nat`.
+
+## Docs & Architecture
 
 ### System Diagram
 
@@ -86,9 +101,7 @@ flowchart TD
     SetupVNC -.->|VNC Args| StartVM
 
     %% Disks
-    Disk[(Disk)] --> SetupDisk
     BaseDisk[(Base Disk)] --> SetupDisk
-    BaseDisk ---> Disk
 
 ```
 
@@ -96,19 +109,18 @@ flowchart TD
 - [Networking Setup](/docs/networking.md) (Bridge/TAP)
 - [Cloud-Init Integration](/docs/cloudinit.md)
 
-## ❓ Why?
+## Why?
 - **No Hypervisor Overhead**: Uses Docker’s native capabilities + KVM acceleration
-- **Declarative Management**: Define VMs in `docker-compose.yml` like containers
+- **Declarative Management**: Define VMs in `compose.yaml` like containers
 - **Cross-Platform**: Works anywhere Docker runs (Linux, macOS/WSL2, cloud)
 
-Yes! Adding licensing, author information, and contribution guidelines makes your project more transparent and professional. Here’s how to integrate these details into your repo description (typically in the `README.md`):
-
-## 📜 License
+## License
 **DevMachines** is released under the **[MIT License](/LICENSE)**.
 
-## 👨‍💻 Author
+## Author
 **Daniil Utkin** ([@erlnby](https://github.com/erlnby))
-✉️ Email: [zolotoie@gmail.com](mailto:zolotoie@gmail.com)
 
-## 🤝 Contributing
+Email: [zolotoie@gmail.com](mailto:zolotoie@gmail.com)
+
+## Contributing
 We welcome contributions! See [CONTRIBUTING.md](/CONTRIBUTING.md) for detailed guidelines.
