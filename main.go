@@ -11,6 +11,7 @@ import (
 	"github.com/utkin-tech/devmachines/config"
 	"github.com/utkin-tech/devmachines/disk"
 	"github.com/utkin-tech/devmachines/network"
+	"github.com/utkin-tech/devmachines/serial"
 	"github.com/utkin-tech/devmachines/vnc"
 )
 
@@ -66,6 +67,9 @@ func run() error {
 
 	vncArgs := vnc.Setup(env.VNC)
 	args = append(args, vncArgs...)
+
+	serialArgs := serial.Setup()
+	args = append(args, serialArgs...)
 
 	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
 		return fmt.Errorf("failed to launch VM: %v", err)

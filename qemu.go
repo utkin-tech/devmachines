@@ -25,6 +25,7 @@ func StartVM(ctx context.Context, params VMParams, out io.Writer, extraArgs []st
 	args := []string{
 		"-m", fmt.Sprintf("%d", params.Memory()),
 		"-smp", fmt.Sprintf("%d", params.CPU()),
+		"-nodefaults",
 		"-qmp", fmt.Sprintf("unix:%s,server,wait=off", QmpMonitor),
 		"-enable-kvm",
 		"-nographic",

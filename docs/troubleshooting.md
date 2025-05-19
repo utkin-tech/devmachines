@@ -25,6 +25,18 @@ qemu-system-x86_64 \
     -nographic
 ```
 
+## Connect to serial terminal
+
+Install `socat`:
+```sh
+sudo apt install socat
+```
+
+```sh
+socat -,raw,echo=0,escape=0x18 UNIX-CONNECT:./socks/serial.sock
+```
+
+Exit keys `Ctrl + X`
 
 ## Inspect Docker image content
 

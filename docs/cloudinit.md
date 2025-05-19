@@ -85,3 +85,13 @@ To unmount `cloudinit.iso`:
 ```sh
 sudo umount /mnt/iso
 ```
+
+## cdrkit
+
+Currently, the `cloudinit.iso` file is generated using `genisoimage` from the `cdrkit` package. However, in future releases, this method will be deprecated and replaced with **QEMU-native image generation**.
+
+The following arguments can be used to attach a **qcow2 image as a CD drive**:
+```sh
+-drive file=/dev/pve/vm-107-cloudinit,if=none,id=drive-ide2,media=cdrom,aio=io_uring \
+-device ide-cd,bus=ide.1,unit=0,drive=drive-ide2,id=ide2
+```
