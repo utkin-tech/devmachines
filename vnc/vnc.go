@@ -1,12 +1,22 @@
 package vnc
 
+import "fmt"
+
+const unixSocketPath = "/socks/vnc.sock"
+
 func Setup(vnc string) []string {
-	if len(vnc) == 0 {
-		return nil
+	startServer()
+
+	vncOption := fmt.Sprintf("unix:%s", unixSocketPath)
+
+	args := []string{
+		"-vga", "std",
+		"-vnc", vncOption,
 	}
 
-	return []string{
-		"-vga", "std",
-		"-vnc", vnc,
+	if len(vnc) == 0 {
+		args = append(args, "-vnc", vnc)
 	}
+
+	return args
 }

@@ -1,4 +1,4 @@
-package serial
+package vnc
 
 import (
 	"io"
@@ -11,7 +11,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	wsConn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("WebSocket upgrade error:", err)
@@ -21,8 +21,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	unixConn, err := net.Dial("unix", unixSocketPath)
 	if err != nil {
-		log.Println("Unix socket error:", err)
-		wsConn.WriteMessage(websocket.TextMessage, []byte("Failed to connect to Unix socket"))
+		log.Println("Unix socket connection error:", err)
 		return
 	}
 	defer unixConn.Close()
@@ -33,13 +32,15 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			n, err := unixConn.Read(buf)
 			if err != nil {
 				if err != io.EOF {
-					log.Println("Read error:", err)
+					log.Println("Unix socket read error:", err)
 				}
-				wsConn.WriteMessage(websocket.TextMessage, []byte("Socket closed"))
-				wsConn.Close()
 				return
 			}
-			wsConn.WriteMessage(websocket.TextMessage, buf[:n])
+			err = wsConn.WriteMessage(websocket.BinaryMessage, buf[:n])
+			if err != nil {
+				log.Println("WebSocket write error:", err)
+				return
+			}
 		}
 	}()
 
@@ -47,20 +48,21 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		_, msg, err := wsConn.ReadMessage()
 		if err != nil {
 			log.Println("WebSocket read error:", err)
-			break
+			unixConn.Close()
+			return
 		}
 		_, err = unixConn.Write(msg)
 		if err != nil {
-			log.Println("Write to Unix socket error:", err)
-			break
+			log.Println("Unix socket write error:", err)
+			return
 		}
 	}
 }
 
 func startServer() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", handleWebSocket)
-	mux.Handle("/", http.FileServer(http.Dir("./static/serial")))
+	mux.HandleFunc("/websockify", proxyHandler)
+	mux.Handle("/", http.FileServer(http.Dir("./static/vnc")))
 
-	go http.ListenAndServe(":8080", mux)
+	go http.ListenAndServe(":8081", mux)
 }
