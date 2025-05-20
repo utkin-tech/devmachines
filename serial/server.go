@@ -39,7 +39,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				wsConn.Close()
 				return
 			}
-			wsConn.WriteMessage(websocket.TextMessage, buf[:n])
+			wsConn.WriteMessage(websocket.BinaryMessage, buf[:n])
 		}
 	}()
 
