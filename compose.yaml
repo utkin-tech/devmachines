@@ -13,6 +13,7 @@ services:
       PORTS: "2222:22"
     volumes:
       - ./disks:/disks
+      - ./socks:/socks
       - type: image
         source: devmachines/ubuntu:noble
         target: /image
@@ -24,6 +25,7 @@ services:
       - "/dev/kvm"
     ports:
       - "2222:2222"
+      - "8080:8080"
     stop_grace_period: 60s
 
   novnc:

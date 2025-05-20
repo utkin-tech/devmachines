@@ -28,4 +28,6 @@ RUN apk add qemu-system-x86_64 qemu-img iproute2 cdrkit
 
 COPY --link --from=binary /devmachines-runtime /devmachines-runtime
 
+COPY ./static/ /static/
+
 CMD ["/devmachines-runtime"]
