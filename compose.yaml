@@ -26,10 +26,5 @@ services:
     ports:
       - "2222:2222"
       - "8080:8080"
+      - "8081:8081"
     stop_grace_period: 60s
-
-  novnc:
-    image: devmachines/novnc
-    ports:
-      - "6080:6080"
-    command: novnc_server --vnc runtime:5977

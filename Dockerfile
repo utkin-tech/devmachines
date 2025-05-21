@@ -30,4 +30,6 @@ COPY --link --from=binary /devmachines-runtime /devmachines-runtime
 
 COPY ./static/ /static/
 
+COPY --link --from=devmachines/novnc /vnc_lite.html /static/vnc/index.html
+
 CMD ["/devmachines-runtime"]

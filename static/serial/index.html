@@ -30,8 +30,15 @@
 
         const socket = new WebSocket('ws://' + location.host + '/ws');
 
+        socket.binaryType = "arraybuffer";
+
         socket.onmessage = (event) => {
-            term.write(event.data);
+            if (event.data instanceof ArrayBuffer) {
+                const uint8Array = new Uint8Array(event.data);
+                term.write(uint8Array);
+            } else {
+                term.write(event.data);
+            }
         };
 
         socket.onopen = () => {
