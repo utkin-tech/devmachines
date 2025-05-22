@@ -18,6 +18,10 @@ import (
 
 const InterfaceName = "eth0"
 
+var BasePorts = []string{
+	"22:22/tcp",
+}
+
 func main() {
 	if err := run(); err != nil {
 		log.Fatalln(err)
@@ -59,7 +63,8 @@ func run() error {
 	case config.NetworkTypeBridge:
 		networkArgs, err = network.SetupBridge(net)
 	case config.NetworkTypeNat:
-		networkArgs, err = network.SetupNAT(env.Ports)
+		ports := append(BasePorts, env.Ports...)
+		networkArgs, err = network.SetupNAT(ports)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to setup network: %v", err)

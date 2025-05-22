@@ -9,11 +9,9 @@ services:
       USER: "user"
       PASSWORD: "pass"
       SSH_KEYS: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeyDWnYtatyEiHKjT/jpLUA7FLMoe97ItrkaLA2cYsX qemu_machine"
-      VNC: ":77"
-      PORTS: "22:22"
     volumes:
-      - ./tmp/disks:/disks
-      - ./tmp/socks:/socks
+      - disks:/disks
+      - socks:/socks
       - type: image
         source: devmachines/ubuntu:noble
         target: /image
@@ -30,3 +28,7 @@ services:
     stop_grace_period: 60s
     labels:
       - tech.utkin.devmachines.runtime=true
+
+volumes:
+  disks:
+  socks:

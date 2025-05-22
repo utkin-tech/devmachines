@@ -33,3 +33,7 @@ COPY ./static/ /static/
 COPY --link --from=devmachines/novnc /vnc_lite.html /static/vnc/index.html
 
 CMD ["/devmachines-runtime"]
+
+EXPOSE 22/tcp 8080/tcp 8081/tcp
+
+VOLUME /socks /disks
