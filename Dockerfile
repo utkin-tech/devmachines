@@ -17,7 +17,7 @@ ARG BUILDTAGS=""
 RUN --mount=type=bind,target=. \
     --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache \
-    go build -tags "${BUILDTAGS}" -trimpath -ldflags "${LDFLAGS}" -o "/devmachines-runtime" .
+    go build -tags "${BUILDTAGS}" -trimpath -ldflags "${LDFLAGS}" -o "/devmachines-runtime" ./cmd/devmachines-runtime
 
 FROM scratch AS binary
 COPY --from=build /devmachines-runtime /devmachines-runtime

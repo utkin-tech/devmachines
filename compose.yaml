@@ -12,8 +12,8 @@ services:
       VNC: ":77"
       PORTS: "22:22"
     volumes:
-      - ./disks:/disks
-      - ./socks:/socks
+      - ./tmp/disks:/disks
+      - ./tmp/socks:/socks
       - type: image
         source: devmachines/ubuntu:noble
         target: /image

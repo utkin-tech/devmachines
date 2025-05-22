@@ -7,12 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/utkin-tech/devmachines/cloudinit"
-	"github.com/utkin-tech/devmachines/config"
-	"github.com/utkin-tech/devmachines/disk"
-	"github.com/utkin-tech/devmachines/network"
-	"github.com/utkin-tech/devmachines/serial"
-	"github.com/utkin-tech/devmachines/vnc"
+	"github.com/utkin-tech/devmachines/pkg/cloudinit"
+	"github.com/utkin-tech/devmachines/pkg/config"
+	"github.com/utkin-tech/devmachines/pkg/disk"
+	"github.com/utkin-tech/devmachines/pkg/network"
+	"github.com/utkin-tech/devmachines/pkg/qemu"
+	"github.com/utkin-tech/devmachines/pkg/serial"
+	"github.com/utkin-tech/devmachines/pkg/vnc"
 )
 
 const InterfaceName = "eth0"
@@ -71,7 +72,7 @@ func run() error {
 	serialArgs := serial.Setup()
 	args = append(args, serialArgs...)
 
-	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
+	if err := qemu.StartVM(ctx, cfg.VM(), nil, args); err != nil {
 		return fmt.Errorf("failed to launch VM: %v", err)
 	}
 
