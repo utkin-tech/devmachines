@@ -13,9 +13,9 @@ __metaclass__ = type
 
 
 DOCUMENTATION = r"""
-name: docker_containers
-short_description: Ansible dynamic inventory plugin for Docker containers
-version_added: 1.1.0
+name: devmachines
+short_description: Ansible dynamic inventory plugin for DevMachines
+version_added: 0.1.0
 author:
   - Felix Fontein (@felixfontein)
 extends_documentation_fragment:
@@ -35,7 +35,7 @@ options:
         it as its own.
     type: str
     required: true
-    choices: [devmachines]
+    choices: [devmachines.core.devmachines]
 
   configure_docker_daemon:
     description:
@@ -174,12 +174,13 @@ from ansible_collections.community.docker.plugins.plugin_utils.unsafe import mak
 from ansible_collections.community.library_inventory_filtering_v1.plugins.plugin_utils.inventory_filter import parse_filters, filter_host
 
 MIN_DOCKER_API = None
+DEVMACHINES_LABEL = 'tech.utkin.devmachines.runtime'
 
 
 class InventoryModule(BaseInventoryPlugin, Constructable):
     ''' Host inventory parser for ansible using Docker daemon as source. '''
 
-    NAME = 'devmachines'
+    NAME = 'devmachines.core.devmachines'
 
     def _slugify(self, value):
         return 'docker_%s' % (re.sub(r'[^\w-]', '_', value).lower().lstrip('_'))
@@ -243,6 +244,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             state = inspect.get('State') or dict()
             config = inspect.get('Config') or dict()
             labels = config.get('Labels') or dict()
+
+            if DEVMACHINES_LABEL not in labels:
+                continue
 
             running = state.get('Running')
 
