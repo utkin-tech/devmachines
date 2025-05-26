@@ -1,0 +1,9 @@
+services:
+  kvmtool:
+    container_name: kvmtool
+    image: alpine
+    volumes:
+      - ./blobs:/blobs
+    devices:
+      - "/dev/kvm"
+    command: sleep infinity
