@@ -25,7 +25,7 @@ type Environment struct {
 	SSHKeys  []string    `env:"SSH_KEYS" validate:"required"`
 	Network  NetworkType `env:"NETWORK" validate:"required,validNetwork" envDefault:"NAT"`
 	VNC      string      `env:"VNC"`
-	Ports    []string    `env:"PORTS" validate:"required,validPorts"`
+	Ports    []string    `env:"PORTS" validate:"validPorts"`
 }
 
 func LoadEnvironment() (*Environment, error) {

@@ -1,0 +1,20 @@
+---
+# See https://docs.ansible.com/ansible/latest/dev_guide/collections_galaxy_meta.html
+
+namespace: devmachines
+name: core
+version: 0.1.0
+readme: README.md
+authors:
+  - Daniil Utkin (github.com/erlnby)
+description: DevMachines collection for Ansible
+license:
+  - GPL-3.0-or-later
+tags:
+  - devmachines
+dependencies:
+  community.docker: ">=4.6.0,<5.0.0"
+repository: https://github.com/utkin-tech/devmachiness
+documentation: https://github.com/utkin-tech/devmachines/tree/main/docs/ansible
+homepage: https://github.com/utkin-tech/devmachines
+issues: https://github.com/utkin-tech/devmachines/issues

@@ -7,15 +7,20 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/utkin-tech/devmachines/cloudinit"
-	"github.com/utkin-tech/devmachines/config"
-	"github.com/utkin-tech/devmachines/disk"
-	"github.com/utkin-tech/devmachines/network"
-	"github.com/utkin-tech/devmachines/serial"
-	"github.com/utkin-tech/devmachines/vnc"
+	"github.com/utkin-tech/devmachines/pkg/cloudinit"
+	"github.com/utkin-tech/devmachines/pkg/config"
+	"github.com/utkin-tech/devmachines/pkg/disk"
+	"github.com/utkin-tech/devmachines/pkg/network"
+	"github.com/utkin-tech/devmachines/pkg/qemu"
+	"github.com/utkin-tech/devmachines/pkg/serial"
+	"github.com/utkin-tech/devmachines/pkg/vnc"
 )
 
 const InterfaceName = "eth0"
+
+var BasePorts = []string{
+	"22:22/tcp",
+}
 
 func main() {
 	if err := run(); err != nil {
@@ -58,7 +63,8 @@ func run() error {
 	case config.NetworkTypeBridge:
 		networkArgs, err = network.SetupBridge(net)
 	case config.NetworkTypeNat:
-		networkArgs, err = network.SetupNAT(env.Ports)
+		ports := append(BasePorts, env.Ports...)
+		networkArgs, err = network.SetupNAT(ports)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to setup network: %v", err)
@@ -71,7 +77,7 @@ func run() error {
 	serialArgs := serial.Setup()
 	args = append(args, serialArgs...)
 
-	if err := StartVM(ctx, cfg.VM(), nil, args); err != nil {
+	if err := qemu.StartVM(ctx, cfg.VM(), nil, args); err != nil {
 		return fmt.Errorf("failed to launch VM: %v", err)
 	}
 

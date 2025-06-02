@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/utkin-tech/devmachines/utils"
+	"github.com/utkin-tech/devmachines/pkg/utils"
 )
 
 const CloudInitIsoPath = "/disks/cloudinit.iso"

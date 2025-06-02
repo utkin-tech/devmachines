@@ -2,23 +2,16 @@
 
 ## Build
 
-Add build utils (alpine):
+### Ubuntu
+
+Build image:
 ```sh
-apk add build-base git make linux-headers libaio-dev zlib-dev
+docker buildx bake ubuntu
 ```
 
-Fix for `alpine`. If there is error when build add line `#include <libgen.h>` into `vfio/core.c` file.
-```sh
-sed -i '1i\#include <libgen.h>' vfio/core.c
-```
+### Alpine
 
-Clone repo:
+Build image:
 ```sh
-git clone git://git.kernel.org/pub/scm/linux/kernel/git/will/kvmtool.git
-cd kvmtool
-```
-:
-Compile:
-```sh
-make
+docker buildx bake alpine
 ```

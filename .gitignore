@@ -1,3 +1,5 @@
 /tmp/
 /disks/
 /socks/
+
+__pycache__/

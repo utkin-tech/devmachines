@@ -5,6 +5,8 @@
         "foxundermoon.shell-format",
         "yzhang.markdown-all-in-one",
         "timonwong.shellcheck",
-        "shardulm94.trailing-spaces"
+        "shardulm94.trailing-spaces",
+        "ms-python.python",
+        "redhat.vscode-yaml"
     ]
 }
